@@ -1840,6 +1840,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1516231484}
   - component: {fileID: 1516231483}
+  - component: {fileID: 1516231485}
   m_Layer: 0
   m_Name: Spawner
   m_TagString: Untagged
@@ -1862,7 +1863,14 @@ MonoBehaviour:
   itemsToPool:
   - amountToPool: 20
     objectToPool: {fileID: 1222029277200836, guid: f78fb797efe4d4a51a0dae6efe82ca47, type: 3}
+    shouldExpand: 1
+    shouldStartActive: 0
+    shouldRandomizePosition: 0
+  - amountToPool: 10
+    objectToPool: {fileID: 1924854802602254292, guid: ab3f7f14e55c3d145a36662365f7d05b, type: 3}
     shouldExpand: 0
+    shouldStartActive: 1
+    shouldRandomizePosition: 1
   pooledObjects:
   - {fileID: 440288153}
   - {fileID: 1645411273}
@@ -1897,6 +1905,20 @@ Transform:
   - {fileID: 803655542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1516231485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1516231482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4dcad68f6749824691e1d01c795e839, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spawner
+  boundsX: 100
+  boundsY: 100
 --- !u!1 &1560864156
 GameObject:
   m_ObjectHideFlags: 0
