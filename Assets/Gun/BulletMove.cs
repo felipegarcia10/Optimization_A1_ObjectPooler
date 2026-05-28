@@ -2,11 +2,16 @@
 
 public class BulletMove : MonoBehaviour {
 
-    void OnBecameInvisible()
+    //void OnBecameInvisible()
+    //{
+    //    //Destroy(this.gameObject);
+    //    this.gameObject.SetActive(false);
+    //}
+    private void OnTriggerEnter(Collider other)
     {
-        //Destroy(this.gameObject);
         this.gameObject.SetActive(false);
     }
+
 
     void Update()
     {
