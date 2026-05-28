@@ -34,28 +34,46 @@ public class ObjectPooler : MonoBehaviour
 
     private void InitializePoolContent(string tagToCompare)
     {
-        // The amount of existing items (of the tag) that are already on the scene
-        int existingItems = pooledObjects.Count(item => item.CompareTag(tagToCompare));
-        
-        // Cycle through the array and check what items of the tag type already exist
-
         // We search in the list the object to pool and calculate the amount of objects left to pool
         ObjectPoolItem poolItemToInstantiate = new ObjectPoolItem();
-        int leftItemsToCreate = 0;
         foreach (var item in itemsToPool.Where(item => item.objectToPool.CompareTag(tagToCompare)))
         {
             poolItemToInstantiate = item;
-            leftItemsToCreate = item.amountToPool - existingItems;
         }
-
-        // Instantiate left objects
-        if (poolItemToInstantiate.objectToPool != null)
+        
+        // The amount of existing items (of the tag) that are already on the scene
+        int existingItems = pooledObjects.Count(item => item.CompareTag(tagToCompare));
+        
+        // if existing items is greater than the max amount, delete the ones that are not needed
+        if (existingItems > poolItemToInstantiate.amountToPool)
         {
-            for (int i = 0; i < leftItemsToCreate; i++)
+            int counter = existingItems - poolItemToInstantiate.amountToPool;
+            for (int i = 0; i < pooledObjects.Count; i++)
             {
-                GameObject obj = Instantiate(poolItemToInstantiate.objectToPool);
-                obj.SetActive(poolItemToInstantiate.shouldStartActive);
-                pooledObjects.Add(obj);
+                if (pooledObjects[i].CompareTag(tagToCompare))
+                {
+                    GameObject objectToClean = pooledObjects[i];
+                    pooledObjects.Remove(objectToClean);
+                    Destroy(objectToClean);
+                    counter--;
+                }
+                
+                if (counter <= 0) break;
+            }
+        }
+        else if (existingItems < poolItemToInstantiate.amountToPool)
+        {
+            int leftItemsToCreate = poolItemToInstantiate.amountToPool - existingItems;
+            
+            // Instantiate left objects
+            if (poolItemToInstantiate.objectToPool != null)
+            {
+                for (int i = 0; i < leftItemsToCreate; i++)
+                {
+                    GameObject obj = Instantiate(poolItemToInstantiate.objectToPool);
+                    obj.SetActive(poolItemToInstantiate.shouldStartActive);
+                    pooledObjects.Add(obj);
+                }
             }
         }
         
