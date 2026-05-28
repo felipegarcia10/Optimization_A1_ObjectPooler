@@ -1,69 +1,95 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+[System.Serializable]
+public class ObjectPoolItem
+{
+    public int amountToPool;
+    public GameObject objectToPool;
+    public bool shouldExpand = true;
+    public bool shouldStartActive = false;
+    public bool shouldRandomizePosition = false;
+}
 
 public class ObjectPooler : MonoBehaviour
 {
     public static ObjectPooler SharedInstance;
 
-    void Awake()
+    public List<ObjectPoolItem> itemsToPool;
+    public List<GameObject> pooledObjects;
+    
+    private void Awake()
     {
         SharedInstance = this;
     }
-
-    [System.Serializable]
-    public class ObjectPoolItem
+    
+    private void Start()
     {
-        public int amountToPool;
-        public GameObject objectToPool;
-        public bool shouldExpand = true;
+        foreach (ObjectPoolItem item in itemsToPool)
+        {
+            InitializePoolContent(item.objectToPool.tag);
+        }
     }
 
-    public List<ObjectPoolItem> itemsToPool;
-    public List<GameObject> pooledObjects;
-    // public GameObject objectToPool;
-    // public int amountToPool;
-    // public bool shouldExpand = true;
+    private void InitializePoolContent(string tagToCompare)
+    {
+        // The amount of existing items (of the tag) that are already on the scene
+        int existingItems = pooledObjects.Count(item => item.CompareTag(tagToCompare));
+        
+        // Cycle through the array and check what items of the tag type already exist
+
+        // We search in the list the object to pool and calculate the amount of objects left to pool
+        ObjectPoolItem poolItemToInstantiate = new ObjectPoolItem();
+        int leftItemsToCreate = 0;
+        foreach (var item in itemsToPool.Where(item => item.objectToPool.CompareTag(tagToCompare)))
+        {
+            poolItemToInstantiate = item;
+            leftItemsToCreate = item.amountToPool - existingItems;
+        }
+
+        // Instantiate left objects
+        if (poolItemToInstantiate.objectToPool != null)
+        {
+            for (int i = 0; i < leftItemsToCreate; i++)
+            {
+                GameObject obj = Instantiate(poolItemToInstantiate.objectToPool);
+                obj.SetActive(poolItemToInstantiate.shouldStartActive);
+                pooledObjects.Add(obj);
+            }
+        }
+        
+        if (!poolItemToInstantiate.shouldRandomizePosition) return;
+        
+        // Randomize position of existing objects
+        foreach (var item in pooledObjects.Where(item => item.CompareTag(tagToCompare)))
+        {
+            item.transform.position = Spawner.Instance.GetRandomPositionInBounds();
+        }
+    }
 
 
     public GameObject GetPooledObject(string tag)
     {
         for (int i = 0; i < pooledObjects.Count; i++)
         {
-            if (!pooledObjects[i].activeInHierarchy && pooledObjects[i].tag == tag)
+            if (!pooledObjects[i].activeInHierarchy && pooledObjects[i].CompareTag(tag))
             {
                 return pooledObjects[i];
             }
         }
+        
         foreach (ObjectPoolItem item in itemsToPool)
         {
-            if (item.objectToPool.tag == tag)
-            {
-                if (item.shouldExpand)
-                {
-                    GameObject obj = (GameObject)Instantiate(item.objectToPool);
-                    obj.SetActive(false);
-                    pooledObjects.Add(obj);
-                    return obj;
-                }
-            }
-        }
-        return null;
-    }
-
-    void Start()
-    {
-        //pooledObjects = new List<GameObject>();
-        foreach (ObjectPoolItem item in itemsToPool)
-        {
-            //CONTINUE HERE: las torretas tambien se estan tomando en cuenta en este calculo, no deberia ser asi
-            int amoutToPool = item.amountToPool - pooledObjects.Count;
-            //for (int i = 0; i < item.amountToPool; i++)
-            for (int i = 0; i < amoutToPool; i++)
+            if (item.objectToPool.CompareTag(tag) &&  item.shouldExpand)
             {
                 GameObject obj = (GameObject)Instantiate(item.objectToPool);
                 obj.SetActive(false);
                 pooledObjects.Add(obj);
+                return obj;
             }
         }
+        
+        return null;
     }
 }
